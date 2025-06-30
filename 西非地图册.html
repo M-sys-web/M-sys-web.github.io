@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>西非国家讲解地图 | 小王Albert</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f0e6;
+            color: #4a3c2a;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            box-shadow: 0 5极 25px rgba(0, 0, 0, 0.08);
+            background-color: #fffcf8;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #8b4513 0%, #a05638 100%);
+            color: #f5e7d2;
+            padding: 30px 40px 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            font-weight: bold;
+            color: #ffcc66;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .up-info {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(245, 231, 210, 0.2);
+            padding: 10px 25px;
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .up-info img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #d2b48c;
+        }
+        
+        .up-info a {
+            color: #f5e7d2;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        
+        .up-info a:hover {
+            text-decoration: underline;
+            color: #ffcc66;
+        }
+        
+        .header-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(139, 69, 19, 0.2) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(184, 134, 11, 0.2) 0%, transparent 20%);
+            z-index: 1;
+        }
+        
+        .main-content {
+            display: flex;
+            min-height: 600px;
+            padding: 0;
+        }
+        
+        .map-section {
+            flex: 1 1 60%;
+            padding: 25px;
+            background: #f5ede1;
+            border-right: 1px solid #e3dbca;
+        }
+        
+        .map-container {
+            position: relative;
+            height: 500px;
+            background: #f0e9dc;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #d9cbb6;
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .legend-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            gap: 30px;
+        }
+        
+        .legend {
+            background: rgba(255, 251, 245, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            gap: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #d9cbb6;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            color: #5a4e36;
+        }
+        
+        .color-box {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+        }
+        
+        .explained {
+            background: #b8860b;
+        }
+        
+        .not-explained {
+            background: #c0a080;
+        }
+        
+        .info-section {
+            flex: 1 1 40%;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            background: #fffaf5;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            color: #8b4513;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e3dbca;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section-title i {
+            color: #b8860b;
+        }
+        
+        .video-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .video-card {
+            background: #fffaf5;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.1);
+            border: 1px solid #e3dbca;
+            transition: transform 0.3s ease;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .video-cover {
+            height: 220px;
+            background: linear-gradient(45deg, #a67b5b, #c19a6b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .video-cover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(90, 78, 54, 0.3), rgba(90, 78, 54, 0.5));
+        }
+        
+        .play-icon {
+            font-size: 5rem;
+            color: rgba(255, 255, 255, 0.9);
+            z-index: 2;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .video-cover img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .country-name {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            z-index: 3;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        .video-details {
+            padding: 25px;
+        }
+        
+        .video-title {
+            font-size: 1.6rem;
+            color: #5a4e36;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .video-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .watch-btn {
+            flex: 1;
+            background: #b8860b;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            text-align: center;
+        }
+        
+        .watch-btn:hover {
+            background: #a0720a;
+            transform: translateY(-2px);
+        }
+        
+        .bookmark-btn {
+            width: 55px;
+            background: #f5ede1;
+            border: 1px solid #d9cbb6;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #a67b5b;
+            font-size: 1.4rem;
+            transition: all 0.3s;
+        }
+        
+        .bookmark-btn:hover {
+            background: #f0e9dc;
+            color: #b8860b;
+        }
+        
+        .no-video {
+            text-align: center;
+            padding: 40px 0;
+            color: #8c7c61;
+            font-size: 1.2rem;
+        }
+        
+        .no-video i {
+            font-size: 4rem;
+            color: #c0a080;
+            margin-bottom: 20px;
+        }
+        
+        footer {
+            background: #5a4e36;
+            color: #d9cbb6;
+            text-align: center;
+            padding: 25px;
+            font-size: 0.95rem;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 15px;
+        }
+        
+        .footer-links a {
+            color: #f0e9dc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: #ffcc66;
+            text-decoration: underline;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .map-section {
+                border-right: none;
+                border-bottom: 1px solid #e3dbca;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .legend-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .legend {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-pattern"></div>
+            <div class="header-content">
+                <h1>西非国家讲解地图</h1>
+                <p class="subtitle">让我们一起变得更强</p>
+                
+                <div class="up-info">
+                    
+                    <a href="https://space.bilibili.com/1140672573">@小王Albert B站主页</a>
+                </div>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="map-section">
+                <div class="map-container">
+                    <div id="map"></div>
+                </div>
+                <div class="legend-container">
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="color-box explained"></div>
+                            <div>已讲解的国家</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box not-explained"></div>
+                            <div>未讲解的国家</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <div class="section-title">
+                    <i class="fas fa-play-circle"></i>
+                    <span>讲解视频</span>
+                </div>
+                
+                <div class="video-info">
+                    <div class="video-card">
+                        <div class="video-cover">
+                            
+                            <div class="country-name" id="country-name">尼日利亚</div>
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                        
+                        <div class="video-details">
+                            <h3 class="video-title" id="video-title">2亿人口非洲第一GDP超级民主大国，穷到全民摆烂【西非13丨尼日利亚】</h3>
+                            
+                            <div class="video-actions">
+                                <a href="https://www.bilibili.com/video/BV1stZUYwER9/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c" target="_blank" class="watch-btn" id="watch-btn">
+                                    <i class="fas fa-play"></i>立即观看
+                                </a>
+                                <button class="bookmark-btn">
+                                    <i class="far fa-bookmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="no-video" id="no-video" style="display: none;">
+                        <i class="fas fa-video-slash"></i>
+                        <p>该国家暂无讲解视频</p>
+                        <p style="margin-top: 15px;">欢迎关注B站账号，获取最新视频更新</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 西非国家讲解地图 | 基于小王Albert视频内容 | 仅供学习交流使用</p>
+            <p>地图数据来源：Natural Earth | 使用Leaflet地图库</p>
+            <div class="footer-links">
+                <a href="#"><i class="fab fa-bilibili"></i> B站主页</a>
+                <a href="#"><i class="fab fa-youtube"></i> YouTube频道</a>
+                <a href="#"><i class="fas fa-rss"></i> 项目博客</a>
+                <a href="#"><i class="fas fa-envelope"></i> 联系作者</a>
+            </div>
+        </footer>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // 初始化地图和默认设置
+        document.addEventListener('DOMContentLoaded', function() {
+            const map = L.map('map').setView([10.0, -10.0], 4);
+            
+            // 添加底图
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // 西非国家数据
+            const countries = [
+                {name: "尼日利亚", lat: 9.0820, lng: 8.6753, explained: true, 
+                 videos: [
+                    {
+                        title: "2亿人口非洲第一GDP超级民主大国，穷到全民摆烂【西非13丨尼日利亚】",
+                        url: "https://www.bilibili.com/video/BV1stZUYwER9/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "加纳", lat: 7.9465, lng: -1.0232, explained: true,
+                 videos: [
+                    {
+                        title: "曾经的非洲独立灯塔，人均GDP翻6倍却依旧赤贫【西非11丨加纳】",
+                        url: "https://www.bilibili.com/video/BV1fbXCY4EeJ/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "塞内加尔", lat: 14.4974, lng: -14.4524, explained: true,
+                 videos: [
+                    {
+                        title: "法国高材生救不了非洲人，'河南造'如何改变西非精法高地？【西非04丨塞内加尔】",
+                        url: "https://www.bilibili.com/video/BV1QMz6YTEyQ/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "科特迪瓦", lat: 7.5400, lng: -5.5471, explained: true,
+                 videos: [
+                    {
+                        title: "买办冒充革命家，西非最富的国家如何被卖掉【西非06｜科特迪瓦】",
+                        url: "https://www.bilibili.com/video/BV1itfHYgEcT/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "马里", lat: 17.5707, lng: -3.9962, explained: true,
+                 videos: [
+                    {
+                        title: "曾经的非洲富哥，今日的战乱苦难之国【西非01丨马里】",
+                        url: "https://www.bilibili.com/video/BV1nutyeXE1F/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "布基纳法索", lat: 12.2383, lng: -1.5616, explained: true,
+                 videos: [
+                    {
+                        title: "离上帝太远离欧洲太近，天降猛男挡不住精法非奸【西非02丨布基纳法索】",
+                        url: "https://www.bilibili.com/video/BV1iQxxesEfQ/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "贝宁", lat: 9.3077, lng: 2.3158, explained: true,
+                 videos: [
+                    {
+                        title: "从理想战士到投降抽象，霸权如何逼良为娼娼【西非08丨贝宁】",
+                        url: "https://www.bilibili.com/video/BV14eKKeiE4U/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "多哥", lat: 8.6195, lng: 1.0817, explained: true,
+                 videos: [
+                    {
+                        title: "爆头总统，巫师治国，西非小国抽象薅薅帝国羊毛【西非09丨多哥】",
+                        url: "https://www.bilibili.com/video/BV1Q69mYbE35/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "塞拉利昂", lat: 8.4606, lng: -11.7796, explained: true,
+                 videos: [
+                    {
+                        title: "砍手童子军，大烟掺人骨，手握钻石却走不出贫困循环【西非10丨塞拉利昂】",
+                        url: "https://www.bilibili.com/video/BV1HSQ6YpE4s/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "几内亚", lat: 9.9456, lng: -9.6966, explained: true,
+                 videos: [
+                    {
+                        title: "西非小国一个矿坑住中英美澳以，看山东企业如何解套！【西非05丨几内亚】",
+                        url: "https://www.bilibili.com/video/BV1vPcHeCE89/?spm_id_from=333.1387.collection.video_card.click&vd_source极=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "利比里亚", lat: 6.4281, lng: -9.4295, explained: true,
+                 videos: [
+                    {
+                        title: "军阀创业大奖赛，足球先生当总统，无脑cos美国下场怎么样？【西非14丨利比里亚】",
+                        url: "https://www.bilibili.com/video/BV1fLMgzhEjb/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "尼日尔", lat: 17.6078, lng: 8.0817, explained: true,
+                 videos: [
+                    {
+                        title: "法国核电生命线，如何成为中法美俄争夺之地？【西非03丨尼日尔】",
+                        url: "https://www.bilibili.com/video/BV12pBsYUEnh/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "几内亚比绍", lat: 11.8037, lng: -15.1804, explained: true,
+                 videos: [
+                    {
+                        title: "中国的西非老战友，如何靠着一带一路摆脱动荡【西非07｜几内亚比绍】",
+                        url: "https://www.bilibili.com/video/BV12RfUYiE4E/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "冈比亚", lat: 13.4432, lng: -15.3101, explained: true,
+                 videos: [
+                    {
+                        title: "总统装疯卖傻，老白女快乐屋，世界边缘小国绝望样本【西非12丨冈比亚】",
+                        url: "https://www.bilibili.com/video/BV1J7oXYhE9N/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "佛得角", lat: 16.0039, lng: -24.0169, explained: true,
+                 videos: [
+                    {
+                        title: "0资源缺水土的非洲国家，愣是靠社会主义翻身了【西非15丨佛得角】",
+                        url: "https://www.bilibili.com/video/BV1VrKBzhEmp/?spm_id_from=333.1387.collection.video_card.click&vd_source=63e2d0d8d7ee172636fdcd1f1da5189c"
+                    }
+                 ]},
+                {name: "毛里塔尼亚", lat: 21.0079, lng: -10.9408, explained: false}
+            ];
+            
+            // 创建国家标记
+            let countryMarkers = [];
+            
+            countries.forEach(country => {
+                // 设置标记颜色
+                const color = country.explained ? '#b8860b' : '#c0a080';
+                const radius = country.explained ? 10 : 8;
+                
+                // 创建标记
+                const marker = L.circleMarker([country.lat, country.lng], {
+                    radius: radius,
+                    fillColor: color,
+                    color: 'white',
+                    weight: country.explained ? 2 : 1,
+                    opacity: 1,
+                    fillOpacity: 0.9
+                }).addTo(map);
+                
+                // 添加国家名称提示
+                marker.bindTooltip(country.name);
+                
+                // 悬停效果
+                marker.on('mouseover', function(e) {
+                    this.setStyle({
+                        radius: radius + 2,
+                        fillOpacity: 1,
+                        weight: 3
+                    });
+                });
+                
+                marker.on('mouseout', function(e) {
+                    this.setStyle({
+                        radius: radius,
+                        fillOpacity: 0.9,
+                        weight: country.explained ? 2 : 1
+                    });
+                });
+                
+                // 点击事件 - 更新右侧视频信息
+                marker.on('click', function(e) {
+                    updateVideoInfo(country);
+                });
+                
+                // 存储引用
+                countryMarkers.push(marker);
+            });
+            
+            // 更新视频信息函数 - 修复版
+            function updateVideoInfo(country) {
+                const videoCard = document.querySelector('.video-card');
+                const noVideo = document.getElementById('no-video');
+                const countryName = document.getElementById('country-name');
+                const videoTitle = document.getElementById('video-title');
+                const watchBtn = document.getElementById('watch-btn');
+                
+                // 更新国家名称
+                countryName.textContent = country.name;
+                
+                if (country.explained && country.videos) {
+                    // 显示视频信息
+                    const video = country.videos[0];
+                    
+                    videoTitle.textContent = video.title;
+                    watchBtn.href = video.url;
+                    
+                    // 显示视频卡片，隐藏无视频提示
+                    videoCard.style.display = 'block';
+                    noVideo.style.display = 'none';
+                } else {
+                    // 没有讲解视频的国家
+                    videoCard.style.display = 'none';
+                    noVideo.style.display = 'block';
+                }
+            }
+            
+            // 设置默认选中尼日利亚
+            updateVideoInfo(countries[0]);
+            
+            // 添加一个地图控件
+            L.control.zoom({
+                position: 'bottomright'
+            }).addTo(map);
+        });
+    </script>
+</body>
+</html>
